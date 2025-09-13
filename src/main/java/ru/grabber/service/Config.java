@@ -16,7 +16,7 @@ public class Config {
         try (InputStream input = Config.class.getClassLoader().getResourceAsStream(file)) {
             properties.load(input);
         } catch (IOException io) {
-            log.error(String.format("When load file : %s" , file), io);
+            log.error(String.format("When load file : %s", file), io);
         }
     }
 

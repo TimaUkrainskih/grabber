@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-
 public class MemStore implements Store {
 
     private final List<Post> posts = new ArrayList<>();
