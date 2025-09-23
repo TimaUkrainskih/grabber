@@ -34,7 +34,7 @@ public class JdbcStore implements Store {
 
             try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    post.setId(generatedKeys.getInt(1));
+                    post.setId(generatedKeys.getLong(1));
                 }
             }
         } catch (SQLException e) {
@@ -45,16 +45,10 @@ public class JdbcStore implements Store {
     @Override
     public List<Post> getAll() {
         List<Post> posts = new ArrayList<>();
-        try (PreparedStatement ps = connection.prepareStatement("SELECT id, name, link, description, created FROM post");
+        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM post");
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                posts.add(new Post(
-                        rs.getInt("id"),
-                        rs.getString("name"),
-                        rs.getString("link"),
-                        rs.getString("description"),
-                        rs.getTimestamp("created").toLocalDateTime()
-                ));
+                posts.add(createPost(rs));
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error when getAll", e);
@@ -65,22 +59,26 @@ public class JdbcStore implements Store {
     @Override
     public Optional<Post> findById(Long id) {
         try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT id, name, link, description, created FROM post WHERE id = ?")) {
+                "SELECT * FROM post WHERE id = ?")) {
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(new Post(
-                            rs.getInt("id"),
-                            rs.getString("name"),
-                            rs.getString("link"),
-                            rs.getString("description"),
-                            rs.getTimestamp("created").toLocalDateTime()
-                    ));
+                    return Optional.of(createPost(rs));
                 }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error when findById", e);
         }
         return Optional.empty();
+    }
+
+    private Post createPost(ResultSet rs) throws SQLException {
+        return new Post(
+                rs.getLong("id"),
+                rs.getString("name"),
+                rs.getString("link"),
+                rs.getString("description"),
+                rs.getTimestamp("created").toLocalDateTime()
+        );
     }
 }

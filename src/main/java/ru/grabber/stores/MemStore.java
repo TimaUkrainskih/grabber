@@ -4,27 +4,28 @@ import ru.grabber.model.Post;
 import ru.grabber.service.Store;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
 
 public class MemStore implements Store {
 
-    private final List<Post> posts = new ArrayList<>();
+    private final Map<Long, Post> posts = new HashMap<>();
 
     @Override
     public void save(Post post) {
-        posts.add(post);
+        posts.put(post.getId(), post);
     }
 
     @Override
     public List<Post> getAll() {
-        return posts;
+        return new ArrayList<>(posts.values());
     }
 
     @Override
     public Optional<Post> findById(Long id) {
-        return posts.stream()
-                .filter(p -> p.getId() == id)
-                .findFirst();
+        return Optional.ofNullable(posts.get(id));
     }
 }

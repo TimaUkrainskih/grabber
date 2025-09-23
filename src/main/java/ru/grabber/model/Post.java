@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Post {
-    private int id;
+    private Long id;
     private String name;
     private String link;
     private String description;
@@ -13,7 +13,7 @@ public class Post {
     public Post() {
     }
 
-    public Post(int id, String name, String link, String description, LocalDateTime created) {
+    public Post(Long id, String name, String link, String description, LocalDateTime created) {
         this.id = id;
         this.name = name;
         this.link = link;
@@ -21,7 +21,7 @@ public class Post {
         this.created = created;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -41,7 +41,7 @@ public class Post {
         this.created = created;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
@@ -66,7 +66,7 @@ public class Post {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Post post = (Post) o;
-        return id == post.id &&
+        return id.equals(post.id) &&
                 Objects.equals(link, post.link);
     }
 
