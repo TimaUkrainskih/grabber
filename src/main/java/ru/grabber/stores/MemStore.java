@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-
 public class MemStore implements Store {
 
     private final Map<Long, Post> posts = new HashMap<>();
