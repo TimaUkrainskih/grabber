@@ -1,8 +1,11 @@
 package ru.grabber.service;
 
 import org.apache.log4j.Logger;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import ru.grabber.model.Post;
 
 import java.io.IOException;
@@ -36,10 +39,12 @@ public class HabrCareerParse implements Parse {
                     Element createdDateElement = row.select(".vacancy-card__date time").first();
                     String datetimeAttr = createdDateElement.attr("datetime");
                     LocalDateTime createdDate = OffsetDateTime.parse(datetimeAttr).toLocalDateTime();
+                    String description = fetchDescription(link);
                     var post = new Post();
                     post.setName(vacancyName);
                     post.setLink(link);
                     post.setCreated(createdDate);
+                    post.setDescription(description);
                     result.add(post);
                 });
             }
@@ -47,5 +52,18 @@ public class HabrCareerParse implements Parse {
             log.error("When load page", e);
         }
         return result;
+    }
+
+    private String fetchDescription(String link) {
+        String description = "";
+        try {
+            Connection connection = Jsoup.connect(link);
+            Document document = connection.get();
+            Elements rows = document.select(".vacancy-description__text .style-ugc");
+            description = rows.text();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return description;
     }
 }
