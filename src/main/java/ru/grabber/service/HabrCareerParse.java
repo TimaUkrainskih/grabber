@@ -7,10 +7,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import ru.grabber.model.Post;
+import ru.grabber.utils.DateTimeParser;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +20,11 @@ public class HabrCareerParse implements Parse {
     private static final String PREFIX = "/vacancies?page=";
     private static final String SUFFIX = "&q=Java%20developer&type=all";
     private static final int COUNT_PAGE_OF_PARSING = 5;
+    private final DateTimeParser dateTimeParser;
+
+    public HabrCareerParse(DateTimeParser dateTimeParser) {
+        this.dateTimeParser = dateTimeParser;
+    }
 
     @Override
     public List<Post> fetch() {
@@ -38,7 +43,7 @@ public class HabrCareerParse implements Parse {
                             linkElement.attr("href"));
                     Element createdDateElement = row.select(".vacancy-card__date time").first();
                     String datetimeAttr = createdDateElement.attr("datetime");
-                    LocalDateTime createdDate = OffsetDateTime.parse(datetimeAttr).toLocalDateTime();
+                    LocalDateTime createdDate = dateTimeParser.parse(datetimeAttr);
                     String description = fetchDescription(link);
                     var post = new Post();
                     post.setName(vacancyName);
