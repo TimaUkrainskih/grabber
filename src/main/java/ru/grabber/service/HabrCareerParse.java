@@ -28,35 +28,49 @@ public class HabrCareerParse implements Parse {
 
     @Override
     public List<Post> fetch() {
-        var result = new ArrayList<Post>();
-        try {
-            for (int pageNumber = 1; pageNumber <= COUNT_PAGE_OF_PARSING; pageNumber++) {
-                String fullLink = "%s%s%d%s".formatted(SOURCE_LINK, PREFIX, pageNumber, SUFFIX);
-                var connection = Jsoup.connect(fullLink);
-                var document = connection.get();
-                var rows = document.select(".vacancy-card__inner");
-                rows.forEach(row -> {
-                    var titleElement = row.select(".vacancy-card__title").first();
-                    var linkElement = titleElement.child(0);
-                    String vacancyName = titleElement.text();
-                    String link = String.format("%s%s", SOURCE_LINK,
-                            linkElement.attr("href"));
-                    Element createdDateElement = row.select(".vacancy-card__date time").first();
-                    String datetimeAttr = createdDateElement.attr("datetime");
-                    LocalDateTime createdDate = dateTimeParser.parse(datetimeAttr);
-                    String description = fetchDescription(link);
-                    var post = new Post();
-                    post.setName(vacancyName);
-                    post.setLink(link);
-                    post.setCreated(createdDate);
-                    post.setDescription(description);
-                    result.add(post);
-                });
-            }
-        } catch (IOException e) {
-            log.error("When load page", e);
+        ArrayList<Post> result = new ArrayList<>();
+        for (int page = 1; page <= COUNT_PAGE_OF_PARSING; page++) {
+            result.addAll(fetchPage(page));
         }
         return result;
+    }
+
+    private List<Post> fetchPage(int pageNumber) {
+        String url = buildPageLink(pageNumber);
+        try {
+            Document document = Jsoup.connect(url).get();
+            return parseVacancyCards(document);
+        } catch (IOException e) {
+            log.error("When load page: " + url, e);
+            return List.of();
+        }
+    }
+
+    private String buildPageLink(int pageNumber) {
+        return "%s%s%d%s".formatted(SOURCE_LINK, PREFIX, pageNumber, SUFFIX);
+    }
+
+    private List<Post> parseVacancyCards(Document document) {
+        ArrayList<Post> result = new ArrayList<>();
+        Elements rows = document.select(".vacancy-card__inner");
+        rows.forEach(row -> result.add(parseVacancy(row)));
+        return result;
+    }
+
+    private Post parseVacancy(Element row) {
+        Element titleElement = row.select(".vacancy-card__title").first();
+        Element linkElement = titleElement.child(0);
+        String name = titleElement.text();
+        String link = SOURCE_LINK + linkElement.attr("href");
+        Element dateElement = row.select(".vacancy-card__date time").first();
+        LocalDateTime created = dateTimeParser.parse(dateElement.attr("datetime"));
+        String description = fetchDescription(link);
+        Post post = new Post();
+        post.setName(name);
+        post.setLink(link);
+        post.setCreated(created);
+        post.setDescription(description);
+        return post;
     }
 
     private String fetchDescription(String link) {
