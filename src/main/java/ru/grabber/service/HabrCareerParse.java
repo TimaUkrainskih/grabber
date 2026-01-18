@@ -65,12 +65,13 @@ public class HabrCareerParse implements Parse {
         Element dateElement = row.select(".vacancy-card__date time").first();
         LocalDateTime created = dateTimeParser.parse(dateElement.attr("datetime"));
         String description = fetchDescription(link);
-        Post post = new Post();
-        post.setName(name);
-        post.setLink(link);
-        post.setCreated(created);
-        post.setDescription(description);
-        return post;
+        return new Post(
+                null,
+                name,
+                link,
+                description,
+                created
+        );
     }
 
     private String fetchDescription(String link) {
