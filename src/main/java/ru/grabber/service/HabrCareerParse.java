@@ -66,7 +66,6 @@ public class HabrCareerParse implements Parse {
         LocalDateTime created = dateTimeParser.parse(dateElement.attr("datetime"));
         String description = fetchDescription(link);
         return new Post(
-                null,
                 name,
                 link,
                 description,
