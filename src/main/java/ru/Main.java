@@ -5,6 +5,7 @@ import ru.grabber.model.Post;
 import ru.grabber.service.Config;
 import ru.grabber.service.SchedulerManager;
 import ru.grabber.service.SuperJobGrab;
+import ru.grabber.service.Web;
 import ru.grabber.stores.JdbcStore;
 
 import java.sql.Connection;
@@ -37,11 +38,9 @@ public class Main {
                     SuperJobGrab.class,
                     store
             );
-            Thread.sleep(10000);
+            new Web(store).start(Integer.parseInt(config.get("server.port")));
         } catch (SQLException e) {
             log.error("When create a connection", e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
         }
     }
 }
