@@ -2,16 +2,13 @@ package ru;
 
 import org.apache.log4j.Logger;
 import ru.grabber.model.Post;
-import ru.grabber.service.Config;
-import ru.grabber.service.SchedulerManager;
-import ru.grabber.service.SuperJobGrab;
-import ru.grabber.service.Web;
+import ru.grabber.service.*;
 import ru.grabber.stores.JdbcStore;
+import ru.grabber.utils.impl.HabrCareerDateTimeParser;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 
 public class Main {
 
@@ -26,12 +23,12 @@ public class Main {
                 config.get("db.password"));
              var scheduler = new SchedulerManager()) {
             var store = new JdbcStore(connection);
-            var post = new Post();
-            post.setName("Super Java Job");
-            post.setLink("https://example.com/posts/1");
-            post.setDescription("Вакансия для Java разработчика");
-            post.setCreated(LocalDateTime.now());
-            store.save(post);
+            HabrCareerParse habrCareerParse = new HabrCareerParse(
+                    new HabrCareerDateTimeParser()
+            );
+            for (Post post : habrCareerParse.fetch()) {
+                store.save(post);
+            }
             scheduler.init();
             scheduler.load(
                     Integer.parseInt(config.get("rabbit.interval")),
